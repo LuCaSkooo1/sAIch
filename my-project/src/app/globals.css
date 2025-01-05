@@ -3,19 +3,60 @@
 @tailwind utilities;
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+  --background: url("/background2.svg");
+  --foreground: #ffffff;
   }
-}
+
 
 body {
   color: var(--foreground);
   background: var(--background);
   font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-geist-sans);
+  background-repeat: no-repeat;
+  background-size: cover;
+}
+
+h1{
+  font-size: 89.76px;
+  font-weight: bold;
+  line-height: normal;
+}
+
+span.color{
+  background: linear-gradient(-45deg, #FF5100,#FF00F6);
+  -webkit-background-clip: text;
+          background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+span.wavy{
+  text-decoration-style: wavy !important;
+  text-decoration: wavy !important;
+}
+
+button.primary{
+  background: linear-gradient(-45deg, #FF5100,#FF00F6);
+  width: 550px;
+  height: 108px;
+  border-radius: 24px;
+  font-size: 38px;
+  font-weight: 600;
+  transition: all 0.3s;
+}
+button.secondary {
+  border-radius: 24px;
+  color: rgb(255, 255, 255);
+  border: 5px solid rgb(255, 255, 255);
+  padding: 10px 20px;
+  font-size: 38px;
+  font-weight: 600;
+  background: transparent;
+  position: relative;
+  transition: all 0.3s;
+  width: 550px;
+  height: 108px;
+}
+
+button:hover{
+  transform: scale(1.1);
 }
