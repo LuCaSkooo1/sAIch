@@ -37,7 +37,7 @@ export default function Home() {
             </h1>
             <div className="flex flex-col items-center xl:items-start gap-5 mt-10">
               <button type="button"className="w-[90%] primary h-20 text-2xl" onClick={() => router.push('/login')}>Prihlásiť sa</button>
-              <button type="button"className="w-[90%] secondary w-96 h-20 text-2xl">Zaregistrovať sa</button>
+              <button type="button"className="w-[90%] secondary w-96 h-20 text-2xl mb-5">Zaregistrovať sa</button>
             </div>
           </div>
           

@@ -1,7 +1,6 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
-
 :root {
   --background: url("/background2.svg");
   --foreground: #ffffff;
@@ -52,4 +51,62 @@ button.secondary {
 
 button:hover{
   transform: scale(1.1);
+}
+
+/*! chessboard.js v1.0.0 | (c) 2019 Chris Oakman | MIT License chessboardjs.com/license */
+
+.clearfix-7da63 {
+  clear: both;
+}
+
+.board-b72b1 {
+  border: 2px solid #404040;
+  box-sizing: content-box;
+}
+
+.square-55d63 {
+  float: left;
+  position: relative;
+
+  /* disable any native browser highlighting */
+  -webkit-touch-callout: none;
+    -webkit-user-select: none;
+     -khtml-user-select: none;
+       -moz-user-select: none;
+        -ms-user-select: none;
+            user-select: none;
+}
+
+.white-1e1d7 {
+  background-color: #ECD0E9;
+  color: #ECD0E9;
+}
+
+.black-3c85d {
+  background-color: #94568B;
+  color: #94568B;
+}
+
+.highlight1-32417, .highlight2-9c5d2 {
+  box-shadow: inset 0 0 3px 3px white;
+}
+
+.notation-322f9 {
+  position: absolute;
+}
+
+.alpha-d2270 {
+  bottom: 1px;
+  right: 3px;
+}
+
+.numeric-fc462 {
+  top: 2px;
+  left: 2px;
+}
+
+#chessboard {
+  width: 70%; /* Make the chessboard fill its parent container */
+  max-width: 500px; /* Optional: Set a maximum width */
+  aspect-ratio: 1 / 1; /* Maintain a square aspect ratio */
 }
