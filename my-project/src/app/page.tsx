@@ -1,6 +1,12 @@
+"use client"
+
 import Image from "next/image";
+import { useRouter } from 'next/navigation'
 
 export default function Home() {
+
+  const router = useRouter()
+
   return (
     <div className="min-h-screen">
       <div className="p-10 items-center justify-items-center gap-16 ">
@@ -30,7 +36,7 @@ export default function Home() {
               Maturitná práca<br/> <span className="color">Lucasa Ligasa</span><br/> <span className="underline ">2025</span>
             </h1>
             <div className="flex flex-col items-center xl:items-start gap-5 mt-10">
-              <button type="button"className="w-[90%] primary h-20 text-2xl">Prihlásiť sa</button>
+              <button type="button"className="w-[90%] primary h-20 text-2xl" onClick={() => router.push('/login')}>Prihlásiť sa</button>
               <button type="button"className="w-[90%] secondary w-96 h-20 text-2xl">Zaregistrovať sa</button>
             </div>
           </div>

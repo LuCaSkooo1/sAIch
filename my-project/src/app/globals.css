@@ -28,6 +28,7 @@ span.color{
           background-clip: text;
   -webkit-text-fill-color: transparent;
 }
+
 span.wavy{
   text-decoration-style: wavy !important;
   text-decoration: wavy !important;
