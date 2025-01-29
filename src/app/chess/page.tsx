@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import Link from 'next/link'
-import ChessboardComponent from './components/Board';
+import { PlayVsComputer } from "./components/Board";
 
 
 export default function Chess() {
@@ -22,8 +22,8 @@ export default function Chess() {
                 </div>
             </div>
         </Link>
-        <div className="flex items-center justify-center">
-          <ChessboardComponent />
+        <div className="flex justify-center items-center text-center w-full">
+          <PlayVsComputer />
         </div>
 
 

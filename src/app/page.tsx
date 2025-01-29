@@ -33,7 +33,7 @@ export default function Home() {
           </div>
           <div>
             <h1 className="text-center md:text-5xl xl:text-start text-4xl xl:text-7xl">
-              Maturitná práca<br/> <span className="color">Lucasa Ligasa</span><br/> <span className="underline ">2025</span>
+              Nauč sa hrať<br/>šach<br/>vďaka <span className="color">AI</span>
             </h1>
             <div className="flex flex-col items-center xl:items-start gap-5 mt-10">
               <button type="button"className="w-[90%] primary h-20 text-2xl" onClick={() => router.push('/login')}>Prihlásiť sa</button>
