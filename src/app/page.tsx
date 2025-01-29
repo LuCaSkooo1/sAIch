@@ -9,7 +9,7 @@ export default function Home() {
 
   return (
     <div className="min-h-screen">
-      <div className="p-10 items-center justify-items-center gap-16 ">
+      <div className="p-10 items-center justify-center flex gap-16 ">
               <div className="w-28 md:w-32">
               <Image
                 src="/šAIch..svg"

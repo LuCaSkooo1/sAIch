@@ -1,13 +1,27 @@
-import { useMemo, useState } from "react";
+import { JSX, useMemo, useState } from "react";
 import { Chessboard } from "react-chessboard";
 import { Chess, type Square } from "chess.js";
 import Engine from "./engine";
-import type { Piece } from "react-chessboard/dist/chessboard/types";
+import { PromotionPieceOption } from "react-chessboard/dist/chessboard/types";
+
+// Type for state managing squares with custom styles (right-clicked, move options, etc.)
+interface SquareStyles {
+  [key: string]: {
+    backgroundColor?: string;
+    background?: string;
+    borderRadius?: string;
+  };
+}
 
 export const PlayVsComputer = () => {
   const pieces = ["wP", "wN", "wB", "wR", "wQ", "wK", "bP", "bN", "bB", "bR", "bQ", "bK"];
+
+  // Custom pieces JSX component
   const customPieces = useMemo(() => {
-    const pieceComponents = {};
+    interface PieceComponents {
+      [key: string]: (props: { squareWidth: number }) => JSX.Element;
+    }
+    const pieceComponents: PieceComponents = {};
     for (const piece of pieces) {
       pieceComponents[piece] = ({ squareWidth }) => (
         <div
@@ -25,16 +39,20 @@ export const PlayVsComputer = () => {
 
   const engine = useMemo(() => new Engine(), []);
   const game = useMemo(() => new Chess(), []);
-  const [won, setWon] = useState<"black" | "white" | "draw" | null>();
+  const [, setWon] = useState<"black" | "white" | "draw" | null>();
   const [gamePosition, setGamePosition] = useState(game.fen());
-  const [stockfishLevel, setStockfishLevel] = useState(2);
-
-  const [moveFrom, setMoveFrom] = useState("");
+  
+  // State for selecting difficulty level
+  const stockfishLevel = engine.stockfish.postMessage("setoption name Skill Level value 1"); // Easy level setting 
+  
+  const [moveFrom, setMoveFrom] = useState<string>("");
   const [moveTo, setMoveTo] = useState<Square | null>(null);
   const [showPromotionDialog, setShowPromotionDialog] = useState(false);
-  const [rightClickedSquares, setRightClickedSquares] = useState({});
-  const [moveSquares, setMoveSquares] = useState({});
-  const [optionSquares, setOptionSquares] = useState({});
+
+  // Explicit types for squares with styles
+  const [rightClickedSquares, setRightClickedSquares] = useState<SquareStyles>({});
+  const [moveSquares] = useState<SquareStyles>({});
+  const [optionSquares, setOptionSquares] = useState<SquareStyles>({});
 
   function checkEnd(side: "black" | "white") {
     if (game.isDraw()) setWon("draw");
@@ -42,18 +60,58 @@ export const PlayVsComputer = () => {
   }
 
   function findBestMove() {
-    engine.evaluatePosition(game.fen(), stockfishLevel);
+    // Map difficulty level to depth
+    const depthMap: { [key in "easy" | "medium" | "hard"]: number } = {
+      easy: 1,   // Shallow depth for easy difficulty
+      medium: 12, // Default depth for medium difficulty
+      hard: 18,   // Deep depth for hard difficulty
+    };
 
+    const depth = depthMap[stockfishLevel];
+
+    engine.evaluatePosition(game.fen(), depth);
+  
     engine.onMessage(({ bestMove }) => {
-      if (bestMove) {
-        game.move(bestMove);
-        setGamePosition(game.fen()); // Update position to trigger animation
+      if (!bestMove || bestMove.length < 4) {
+        return;
+      }
+  
+      console.log("Best move from engine:", bestMove);
+      console.log("Current FEN:", game.fen());
+  
+      const move = {
+        from: bestMove.substring(0, 2) as Square,
+        to: bestMove.substring(2, 4) as Square,
+        promotion: bestMove.length > 4 ? (bestMove[4] as PromotionPieceOption) : undefined,
+      };
+  
+      console.log("Parsed move object:", move);
+  
+      // Validate the move
+      const validMoves = game.moves({ square: move.from, verbose: true });
+  
+      if (validMoves.length === 0) {
+      } else {
+        console.log(`Valid moves for ${move.from}:`, validMoves);
+      }
+  
+      const isValidMove = validMoves.some((m) => m.to === move.to);
+      if (!isValidMove) {
+        return;
+      }
+  
+      // Apply the move
+      const result = game.move(move);
+      if (result === null) {
+        console.error("Game rejected the move:", move);
+      } else {
+        setGamePosition(game.fen());
         checkEnd("black");
       }
     });
   }
 
-  function getMoveOptions(square) {
+  function getMoveOptions(square: Square) {
     const moves = game.moves({
       square,
       verbose: true,
@@ -62,8 +120,8 @@ export const PlayVsComputer = () => {
       setOptionSquares({});
       return false;
     }
-    const newSquares = {};
-    moves.map((move) => {
+    const newSquares: SquareStyles = {};
+    moves.forEach((move) => {
       newSquares[move.to] = {
         background:
           game.get(move.to) && game.get(move.to).color !== game.get(square).color
@@ -71,7 +129,6 @@ export const PlayVsComputer = () => {
             : "radial-gradient(circle, rgba(0,0,0,.1) 25%, transparent 25%)",
         borderRadius: "50%",
       };
-      return move;
     });
     newSquares[square] = {
       background: "rgba(255, 255, 0, 0.4)",
@@ -80,7 +137,7 @@ export const PlayVsComputer = () => {
     return true;
   }
 
-  function onSquareClick(square) {
+  function onSquareClick(square: Square) {
     setRightClickedSquares({});
 
     // from square
@@ -94,7 +151,7 @@ export const PlayVsComputer = () => {
     if (!moveTo) {
       // check if valid move before showing dialog
       const moves = game.moves({
-        moveFrom,
+        square: moveFrom as Square,
         verbose: true,
       });
       const foundMove = moves.find((m) => m.from === moveFrom && m.to === square);
@@ -142,14 +199,18 @@ export const PlayVsComputer = () => {
     }
   }
 
-  function onPromotionPieceSelect(piece) {
+  function onPromotionPieceSelect(piece?: PromotionPieceOption): boolean {
     // if no piece passed then user has cancelled dialog, don't make move and reset
     if (piece) {
       const move = game.move({
         from: moveFrom,
-        to: moveTo,
-        promotion: piece[1].toLowerCase() ?? "q",
+        to: moveTo!,
+        promotion: piece,
       });
+      if (move === null) {
+        console.error("Invalid promotion move");
+        return false;
+      }
       setGamePosition(game.fen()); // Update position to trigger animation
       checkEnd("white");
       findBestMove();
@@ -161,14 +222,19 @@ export const PlayVsComputer = () => {
     return true;
   }
 
-  function onSquareRightClick(square) {
+  function onSquareRightClick(square: Square) {
     const colour = "rgba(0, 0, 255, 0.4)";
-    setRightClickedSquares({
-      ...rightClickedSquares,
-      [square]:
-        rightClickedSquares[square] && rightClickedSquares[square].backgroundColor === colour
-          ? undefined
-          : { backgroundColor: colour },
+
+    setRightClickedSquares((prev) => {
+      const newSquares = { ...prev };
+
+      if (newSquares[square] && newSquares[square].backgroundColor === colour) {
+        delete newSquares[square]; // Properly remove the property
+      } else {
+        newSquares[square] = { backgroundColor: colour };
+      }
+
+      return newSquares;
     });
   }
 

@@ -5,8 +5,9 @@ import Link from 'next/link'
 export default function Register() {
   return (
     <div className="min-h-screen">
-        <Link href="/">
-            <div className="p-10 items-center justify-items-center gap-16 ">
+            <div className="p-10 items-center flex justify-center gap-16 ">
+            <Link href="/">
+
                 <div className="w-28 md:w-32">
                 <Image
                     src="/šAIch..svg"
@@ -16,8 +17,9 @@ export default function Register() {
                     layout="responsive"
                     />
                     </div>
+                    </Link>
+
       </div>
-        </Link>
         <div className="flex flex-col items-center mt-10">
           <h1 className="text-3xl">
             Registrácia
