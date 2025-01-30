@@ -18,8 +18,8 @@ export default function Chess() {
                         alt="ŠAICH"
                         width={150}
                         height={66}
-                        layout="responsive"
-                        />
+                        className="size-full"
+                      />
                 </div>
                 </Link>
 
@@ -27,10 +27,6 @@ export default function Chess() {
         <div className="flex justify-center items-center text-center w-full">
           <PlayVsComputer />
         </div>
-
-
-      
-      
     </div>
   );
 }

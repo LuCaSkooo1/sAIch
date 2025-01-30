@@ -16,7 +16,7 @@ export default function Home() {
                 alt="ŠAICH"
                 width={150}
                 height={66}
-                layout="responsive"
+                className="size-full"
                 />
                 </div>
       </div>
@@ -24,9 +24,9 @@ export default function Home() {
         <div className="flex flex-col xl:flex-row justify-center items-center gap-10">
           <div className="w-[70%] sm:w-1/3 md:w-1/2 max-w-[450px] aspect-square rounded">
             <Image 
-              width={5} 
-              height={5} 
-              layout="responsive" 
+              width={500} 
+              height={500} 
+              className="size-full"
               src="/chessboard.png"
               alt="chessboard"
               />

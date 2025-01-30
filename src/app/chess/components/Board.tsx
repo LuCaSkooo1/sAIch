@@ -1,3 +1,5 @@
+"use client"
+
 import { JSX, useMemo, useState } from "react";
 import { Chessboard } from "react-chessboard";
 import { Chess, type Square } from "chess.js";
@@ -14,10 +16,9 @@ interface SquareStyles {
 }
 
 export const PlayVsComputer = () => {
-  const pieces = ["wP", "wN", "wB", "wR", "wQ", "wK", "bP", "bN", "bB", "bR", "bQ", "bK"];
-
   // Custom pieces JSX component
   const customPieces = useMemo(() => {
+    const pieces = ["wP", "wN", "wB", "wR", "wQ", "wK", "bP", "bN", "bB", "bR", "bQ", "bK"];
     interface PieceComponents {
       [key: string]: (props: { squareWidth: number }) => JSX.Element;
     }
@@ -41,10 +42,10 @@ export const PlayVsComputer = () => {
   const game = useMemo(() => new Chess(), []);
   const [, setWon] = useState<"black" | "white" | "draw" | null>();
   const [gamePosition, setGamePosition] = useState(game.fen());
-  
+
   // State for selecting difficulty level
-  const stockfishLevel = engine.stockfish.postMessage("setoption name Skill Level value 1"); // Easy level setting 
-  
+  engine.stockfish?.postMessage("setoption name Skill Level value 1"); // Easy level setting 
+
   const [moveFrom, setMoveFrom] = useState<string>("");
   const [moveTo, setMoveTo] = useState<Square | null>(null);
   const [showPromotionDialog, setShowPromotionDialog] = useState(false);
@@ -61,45 +62,37 @@ export const PlayVsComputer = () => {
 
   function findBestMove() {
     // Map difficulty level to depth
-    const depthMap: { [key in "easy" | "medium" | "hard"]: number } = {
-      easy: 1,   // Shallow depth for easy difficulty
-      medium: 12, // Default depth for medium difficulty
-      hard: 18,   // Deep depth for hard difficulty
-    };
+    engine.evaluatePosition(game.fen(), 4);
 
-    const depth = depthMap[stockfishLevel];
-
-    engine.evaluatePosition(game.fen(), depth);
-  
-    engine.onMessage(({ bestMove }) => {
+    engine.onMessage?.(({ bestMove }) => {
       if (!bestMove || bestMove.length < 4) {
         return;
       }
-  
+
       console.log("Best move from engine:", bestMove);
       console.log("Current FEN:", game.fen());
-  
+
       const move = {
         from: bestMove.substring(0, 2) as Square,
         to: bestMove.substring(2, 4) as Square,
         promotion: bestMove.length > 4 ? (bestMove[4] as PromotionPieceOption) : undefined,
       };
-  
+
       console.log("Parsed move object:", move);
-  
+
       // Validate the move
       const validMoves = game.moves({ square: move.from, verbose: true });
-  
+
       if (validMoves.length === 0) {
       } else {
         console.log(`Valid moves for ${move.from}:`, validMoves);
       }
-  
+
       const isValidMove = validMoves.some((m) => m.to === move.to);
       if (!isValidMove) {
         return;
       }
-  
+
       // Apply the move
       const result = game.move(move);
       if (result === null) {
