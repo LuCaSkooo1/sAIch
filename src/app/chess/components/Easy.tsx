@@ -29,7 +29,7 @@ export const PlayVsComputer = () => {
           style={{
             width: squareWidth,
             height: squareWidth,
-            backgroundImage: `url(./chesspieces/${piece}.png)`,
+            backgroundImage: `url(/chesspieces/${piece}.png)`,
             backgroundSize: "100%",
           }}
         />
@@ -62,7 +62,13 @@ export const PlayVsComputer = () => {
 
   function findBestMove() {
     // Map difficulty level to depth
-    engine.evaluatePosition(game.fen(), 4);
+    setTimeout(() => {
+
+
+      engine.evaluatePosition(game.fen(), 4);
+
+
+    }, 1000)
 
     engine.onMessage?.(({ bestMove }) => {
       if (!bestMove || bestMove.length < 4) {
@@ -195,19 +201,24 @@ export const PlayVsComputer = () => {
   function onPromotionPieceSelect(piece?: PromotionPieceOption): boolean {
     // if no piece passed then user has cancelled dialog, don't make move and reset
     if (piece) {
+      // Remove the color prefix from the promotion piece
+      const promotionPiece = piece[1].toLowerCase(); // Extracts 'q' from 'wQ' or 'bQ'
+  
       const move = game.move({
         from: moveFrom,
         to: moveTo!,
-        promotion: piece,
+        promotion: promotionPiece,
       });
+  
       if (move === null) {
-        console.error("Invalid promotion move");
         return false;
       }
+  
       setGamePosition(game.fen()); // Update position to trigger animation
       checkEnd("white");
       findBestMove();
     }
+  
     setMoveFrom("");
     setMoveTo(null);
     setShowPromotionDialog(false);

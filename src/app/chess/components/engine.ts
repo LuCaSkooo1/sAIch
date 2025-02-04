@@ -8,13 +8,14 @@ export default class Engine {
     constructor() {
       if (typeof window !== "undefined") {
         // Only create the worker in the browser environment
-        this.stockfish = new window.Worker("./stockfish.wasm.js", { type: "module" });  // Correct path to your stockfish worker
+        this.stockfish = new window.Worker("/stockfish.wasm.js", { type: "module" });  // Correct path to your stockfish worker
         this.isReady = false;
         this.onMessage = (callback) => {
           this.stockfish?.addEventListener("message", (e) => {
             callback(this.transformSFMessageData(e));
           });
         };
+
         this.init();
       }
     }

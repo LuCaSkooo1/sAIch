@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import Link from 'next/link'
-import { PlayVsComputer } from "./components/Board";
+import { PlayVsComputer } from "../components/Hard";
 
 
 export default function Chess() {
