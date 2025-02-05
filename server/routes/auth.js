@@ -6,18 +6,31 @@ import dotenv from "dotenv";
 dotenv.config();
 const router = express.Router();
 
+
 // User registration
 router.post("/register", (req, res) => {
-    const { username, password } = req.body;
+    const { username, password, confirmPassword } = req.body;
+
+    // Check if password and confirmPassword match
+    if (password !== confirmPassword) {
+        return res.status(400).json({ error: "Passwords do not match" });
+    }
 
     // Hash password
     const hashedPassword = bcrypt.hashSync(password, 10);
 
-    db.run("INSERT INTO users (username, password) VALUES (?, ?)", [username, hashedPassword], function (err) {
-        if (err) return res.status(400).json({ error: "User already exists" });
+    // Insert user into the database
+    db.run(
+        "INSERT INTO users (username, password) VALUES (?, ?)",
+        [username, hashedPassword],
+        function (err) {
+            if (err) {
+                return res.status(400).json({ error: "User already exists" });
+            }
 
-        res.json({ message: "User registered successfully" });
-    });
+            res.json({ message: "User registered successfully" });
+        }
+    );
 });
 
 // User login
