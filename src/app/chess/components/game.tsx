@@ -1,6 +1,6 @@
-"use client"
+"use client";
 
-import { JSX, useMemo, useState } from "react";
+import { JSX, useCallback, useEffect, useMemo, useState } from "react";
 import { Chessboard } from "react-chessboard";
 import { Chess, type Square } from "chess.js";
 import Engine from "./engine";
@@ -15,10 +15,28 @@ interface SquareStyles {
   };
 }
 
-export const PlayVsComputer = () => {
-  // Custom pieces JSX component
+export const PlayVsComputer = ({
+  aiAssistantActive,
+  level = 1,
+}: {
+  aiAssistantActive: boolean;
+  level: number;
+}) => {
   const customPieces = useMemo(() => {
-    const pieces = ["wP", "wN", "wB", "wR", "wQ", "wK", "bP", "bN", "bB", "bR", "bQ", "bK"];
+    const pieces = [
+      "wP",
+      "wN",
+      "wB",
+      "wR",
+      "wQ",
+      "wK",
+      "bP",
+      "bN",
+      "bB",
+      "bR",
+      "bQ",
+      "bK",
+    ];
     interface PieceComponents {
       [key: string]: (props: { squareWidth: number }) => JSX.Element;
     }
@@ -39,19 +57,20 @@ export const PlayVsComputer = () => {
   }, []);
 
   const engine = useMemo(() => new Engine(), []);
+  engine.stockfish?.postMessage(`setoption name Skill Level value ${level}`);
   const game = useMemo(() => new Chess(), []);
   const [, setWon] = useState<"black" | "white" | "draw" | null>();
   const [gamePosition, setGamePosition] = useState(game.fen());
-
-  // State for selecting difficulty level
-  engine.stockfish?.postMessage("setoption name Skill Level value 1"); // Easy level setting 
 
   const [moveFrom, setMoveFrom] = useState<string>("");
   const [moveTo, setMoveTo] = useState<Square | null>(null);
   const [showPromotionDialog, setShowPromotionDialog] = useState(false);
 
-  // Explicit types for squares with styles
-  const [rightClickedSquares, setRightClickedSquares] = useState<SquareStyles>({});
+  const [bestLine, setBestline] = useState("");
+
+  const [rightClickedSquares, setRightClickedSquares] = useState<SquareStyles>(
+    {}
+  );
   const [moveSquares] = useState<SquareStyles>({});
   const [optionSquares, setOptionSquares] = useState<SquareStyles>({});
 
@@ -60,55 +79,21 @@ export const PlayVsComputer = () => {
     if (game.isCheckmate()) setWon(side);
   }
 
-  function findBestMove() {
-    // Map difficulty level to depth
-    setTimeout(() => {
+  const findBestMove = useCallback(() => {
+    if (game.turn() === "w") {
+      engine.evaluatePosition(game.fen(), 10);
+    } else {
+      setTimeout(() => {
+        engine.evaluatePosition(game.fen(), 10);
+      }, 500);
+    }
 
-
-      engine.evaluatePosition(game.fen(), 4);
-
-
-    }, 1000)
-
-    engine.onMessage?.(({ bestMove }) => {
-      if (!bestMove || bestMove.length < 4) {
-        return;
-      }
-
-      console.log("Best move from engine:", bestMove);
-      console.log("Current FEN:", game.fen());
-
-      const move = {
-        from: bestMove.substring(0, 2) as Square,
-        to: bestMove.substring(2, 4) as Square,
-        promotion: bestMove.length > 4 ? (bestMove[4] as PromotionPieceOption) : undefined,
-      };
-
-      console.log("Parsed move object:", move);
-
-      // Validate the move
-      const validMoves = game.moves({ square: move.from, verbose: true });
-
-      if (validMoves.length === 0) {
-      } else {
-        console.log(`Valid moves for ${move.from}:`, validMoves);
-      }
-
-      const isValidMove = validMoves.some((m) => m.to === move.to);
-      if (!isValidMove) {
-        return;
-      }
-
-      // Apply the move
-      const result = game.move(move);
-      if (result === null) {
-        console.error("Game rejected the move:", move);
-      } else {
-        setGamePosition(game.fen());
-        checkEnd("black");
-      }
+    engine.onMessage?.(({ bestMove, pv }) => {
+      if (game.turn() === "w" && pv) setBestline(pv);
+      if (game.turn() === "b" && bestMove) game.move(bestMove);
+      setGamePosition(game.fen());
     });
-  }
+  }, [engine, game]);
 
   function getMoveOptions(square: Square) {
     const moves = game.moves({
@@ -123,14 +108,15 @@ export const PlayVsComputer = () => {
     moves.forEach((move) => {
       newSquares[move.to] = {
         background:
-          game.get(move.to) && game.get(move.to).color !== game.get(square).color
+          game.get(move.to) &&
+          game.get(move.to).color !== game.get(square).color
             ? "radial-gradient(circle, rgba(0,0,0,.1) 85%, transparent 85%)"
             : "radial-gradient(circle, rgba(0,0,0,.1) 25%, transparent 25%)",
         borderRadius: "50%",
       };
     });
     newSquares[square] = {
-      background: "rgba(255, 255, 0, 0.4)",
+      background: "rgba(251, 0, 255, 0.4)",
     };
     setOptionSquares(newSquares);
     return true;
@@ -139,86 +125,88 @@ export const PlayVsComputer = () => {
   function onSquareClick(square: Square) {
     setRightClickedSquares({});
 
-    // from square
     if (!moveFrom) {
       const hasMoveOptions = getMoveOptions(square);
       if (hasMoveOptions) setMoveFrom(square);
       return;
     }
 
-    // to square
     if (!moveTo) {
-      // check if valid move before showing dialog
       const moves = game.moves({
         square: moveFrom as Square,
         verbose: true,
       });
-      const foundMove = moves.find((m) => m.from === moveFrom && m.to === square);
-      // not a valid move
+      const foundMove = moves.find(
+        (m) => m.from === moveFrom && m.to === square
+      );
       if (!foundMove) {
-        // check if clicked on new piece
         const hasMoveOptions = getMoveOptions(square);
-        // if new piece, setMoveFrom, otherwise clear moveFrom
         setMoveFrom(hasMoveOptions ? square : "");
         return;
       }
 
-      // valid move
       setMoveTo(square);
 
-      // if promotion move
       if (
-        (foundMove.color === "w" && foundMove.piece === "p" && square[1] === "8") ||
-        (foundMove.color === "b" && foundMove.piece === "p" && square[1] === "1")
+        (foundMove.color === "w" &&
+          foundMove.piece === "p" &&
+          square[1] === "8") ||
+        (foundMove.color === "b" &&
+          foundMove.piece === "p" &&
+          square[1] === "1")
       ) {
         setShowPromotionDialog(true);
         return;
       }
 
-      // is normal move
       const move = game.move({
         from: moveFrom,
         to: square,
         promotion: "q",
       });
 
-      // if invalid, setMoveFrom and getMoveOptions
       if (move === null) {
         const hasMoveOptions = getMoveOptions(square);
         if (hasMoveOptions) setMoveFrom(square);
         return;
       }
-      setGamePosition(game.fen()); // Update position to trigger animation
+      setGamePosition(game.fen());
       checkEnd("white");
       setMoveFrom("");
       setMoveTo(null);
       setOptionSquares({});
+      setBestline("");
       findBestMove();
       return;
     }
   }
 
+  useEffect(() => {
+    if (!game.isGameOver() || game.isDraw()) {
+      findBestMove();
+    }
+  }, [findBestMove, game, gamePosition]);
+
+  const bestMove = bestLine?.split(" ")?.[0];
+
   function onPromotionPieceSelect(piece?: PromotionPieceOption): boolean {
-    // if no piece passed then user has cancelled dialog, don't make move and reset
     if (piece) {
-      // Remove the color prefix from the promotion piece
-      const promotionPiece = piece[1].toLowerCase(); // Extracts 'q' from 'wQ' or 'bQ'
-  
+      const promotionPiece = piece[1].toLowerCase();
       const move = game.move({
         from: moveFrom,
         to: moveTo!,
         promotion: promotionPiece,
       });
-  
+
       if (move === null) {
         return false;
       }
-  
-      setGamePosition(game.fen()); // Update position to trigger animation
+
+      setGamePosition(game.fen());
       checkEnd("white");
       findBestMove();
     }
-  
+
     setMoveFrom("");
     setMoveTo(null);
     setShowPromotionDialog(false);
@@ -233,7 +221,7 @@ export const PlayVsComputer = () => {
       const newSquares = { ...prev };
 
       if (newSquares[square] && newSquares[square].backgroundColor === colour) {
-        delete newSquares[square]; // Properly remove the property
+        delete newSquares[square];
       } else {
         newSquares[square] = { backgroundColor: colour };
       }
@@ -263,9 +251,35 @@ export const PlayVsComputer = () => {
         }}
         promotionToSquare={moveTo}
         showPromotionDialog={showPromotionDialog}
-        animationDuration={300} // Enable animations with a duration of 300ms
-        arePiecesDraggable={false} // Disable dragging for "click to move"
+        animationDuration={300}
+        arePiecesDraggable={false}
+        customArrows={
+          aiAssistantActive && bestMove
+            ? [
+                [
+                  bestMove.substring(0, 2) as Square,
+                  bestMove.substring(2, 4) as Square,
+                  "rgba(251, 0, 255, 1)",
+                ],
+              ]
+            : []
+        }
       />
+      {/* <div className="flex gap-5 items-center mt-5">
+        <Switch
+          checked={aiAssistantActive}
+          onCheckedChange={setAiAssistantActive}
+          className="data-[state=checked]:bg-[#FF00F6] data-[state=unchecked]:bg-gray-500
+                 relative h-7 w-[50px] rounded-full transition-colors 
+                 before:absolute before:left-1 before:top-1 before:h-4 before:w-4 
+                 before:rounded-full before:bg-white before:shadow-md 
+                 before:transition-transform before:duration-200 
+                 data-[state=checked]:before:translate-x-6 items-center"
+        />
+        <h1 className="text-2xl">
+          <span className="color">AI</span> Asistent
+        </h1>
+      </div> */}
     </div>
   );
 };

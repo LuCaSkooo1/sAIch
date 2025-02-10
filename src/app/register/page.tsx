@@ -3,7 +3,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from 'next/navigation'
-import { useState } from "react";
+import { FormEvent, useState } from "react";
 
 
 export default function Register() {
@@ -12,8 +12,9 @@ export default function Register() {
   const [confirmPassword, setConfirmPassword] = useState("");
   const [error, setError] = useState("");
   const router = useRouter()
+  const usernameRegex = /^\S+$/;
 
-  const handleSubmit = async (e: { preventDefault: () => void; }) => {
+  const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
     // Reset messages
@@ -24,6 +25,16 @@ export default function Register() {
       setError("Heslá sa nezhodujú");
       return;
     }
+
+    if (username.length > 10){
+      setError("Prezívka musí byť kratšia ako 10 charakterov")
+      return
+    }
+
+    if (!usernameRegex.test(username)) {
+      setError("Prezívka nemôže obsahovať medzery")
+      return
+    } 
 
     // Send data to the backend
     try {
@@ -41,7 +52,7 @@ export default function Register() {
         setUsername("");
         setPassword("");
         setConfirmPassword("");
-        router.push("/opponentSelect")
+        router.push("/login")
       } else {
         setError(data.error || "Registrácia zlyhala");
       }
@@ -118,7 +129,7 @@ export default function Register() {
             Zaregistrovať sa
           </button>
         </form>
-        {error && <p style={{ color: "red" }}>{error}</p>}
+        {error && <p className="text-red-600 mt-5">{error}</p>}
         <p className="mt-5 font-normal">
           Máte účet ?{" "}
           <Link href="/login">

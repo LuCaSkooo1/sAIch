@@ -115,3 +115,66 @@ button:hover{
   max-width: 500px; /* Optional: Set a maximum width */
   aspect-ratio: 1 / 1; /* Maintain a square aspect ratio */
 }
+
+/* global.css */
+
+/* Popover Trigger (NickName and Icon) */
+.PopoverTrigger {
+  cursor: pointer;
+  transition: transform 0.2s ease, opacity 0.2s ease;
+}
+
+.PopoverTrigger:hover {
+  opacity: 0.8;
+  transform: scale(1.05);
+}
+
+/* Popover Content */
+.PopoverContent {
+  background: white;
+  border-radius: 8px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+  padding: 16px;
+  animation: fadeIn 0.3s ease;
+}
+
+/* Smooth fade-in animation for Popover */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Hover effect for items inside Popover */
+.PopoverContent .flex.items-center.gap-3 {
+  padding: 8px 12px;
+  border-radius: 6px;
+  transition: background-color 0.2s ease, transform 0.2s ease;
+}
+
+.PopoverContent .flex.items-center.gap-3:hover {
+  background-color: rgba(0, 0, 0, 0.05);
+  transform: translateX(5px);
+}
+
+/* Logout item specific styles */
+.PopoverContent .flex.items-center.gap-3.text-red-500:hover {
+  background-color: rgba(255, 0, 0, 0.05);
+}
+
+/* Icon and text alignment */
+.PopoverContent .flex.items-center.gap-3 svg {
+  width: 20px;
+  height: 20px;
+}
+
+.PopoverContent .flex.items-center.gap-3 h4 {
+  margin: 0;
+  font-size: 14px;
+}
+

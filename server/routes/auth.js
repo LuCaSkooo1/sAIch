@@ -5,7 +5,7 @@ import db from "../db/database.js";
 import dotenv from "dotenv";
 dotenv.config();
 const router = express.Router();
-
+import { authenticateToken } from "../middleware/authMiddleware.js";
 
 // User registration
 router.post("/register", (req, res) => {
@@ -13,7 +13,7 @@ router.post("/register", (req, res) => {
 
     // Check if password and confirmPassword match
     if (password !== confirmPassword) {
-        return res.status(400).json({ error: "Passwords do not match" });
+        return res.status(400).json({ error: "Heslá sa nezhodujú" });
     }
 
     // Hash password
@@ -25,10 +25,10 @@ router.post("/register", (req, res) => {
         [username, hashedPassword],
         function (err) {
             if (err) {
-                return res.status(400).json({ error: "User already exists" });
+                return res.status(400).json({ error: "Používateľ už existuje" });
             }
 
-            res.json({ message: "User registered successfully" });
+            res.json({ message: "Používateľ úspešne zaregistrovaný" });
         }
     );
 });
@@ -39,13 +39,37 @@ router.post("/login", (req, res) => {
 
     db.get("SELECT * FROM users WHERE username = ?", [username], (err, user) => {
         if (!user || !bcrypt.compareSync(password, user.password)) {
-            return res.status(401).json({ error: "Invalid credentials" });
+            return res.status(401).json({ error: "Nesprávne meno alebo heslo" });
         }
 
         // Generate JWT token
         const token = jwt.sign({ userId: user.id }, process.env.JWT_SECRET, { expiresIn: "7d" });
 
         res.json({ token });
+    });
+});
+
+router.get("/opponentSelect", authenticateToken, (req, res) => {
+    const userId = req.user.userId;
+
+    db.get("SELECT id, username FROM users WHERE id = ?", [userId], (err, user) => {
+        if (err || !user) {
+            return res.status(404).json({ error: "User not found" });
+        }
+
+        res.json({ user }); // Return user data
+    });
+});
+
+router.get("/user", authenticateToken, (req, res) => {
+    const userId = req.user.userId;
+
+    db.get("SELECT id, username FROM users WHERE id = ?", [userId], (err, user) => {
+        if (err || !user) {
+            return res.status(404).json({ error: "User not found" });
+        }
+
+        res.json({ user }); // Return user data
     });
 });
 

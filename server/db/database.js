@@ -12,7 +12,8 @@ db.serialize(() => {
         password TEXT
     )`);
 
-    db.run(`CREATE TABLE IF NOT EXISTS stats (
+    db.run(`CREATE TABLE IF NOT 
+        EXISTS stats (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         user_id INTEGER,
         bot_id INTEGER,

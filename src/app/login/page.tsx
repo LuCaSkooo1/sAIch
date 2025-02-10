@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { useState } from "react";
+import { FormEvent, useState } from "react";
 import { useRouter } from "next/navigation";
 
 export default function Login() {
@@ -11,9 +11,9 @@ export default function Login() {
   const [error, setError] = useState("");
   const router = useRouter();
 
-  const handleSubmit = async (e: { preventDefault: () => void }) => {
+  const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-
+    console.log("login try")
     // Reset error message
     setError("");
 
@@ -31,6 +31,8 @@ export default function Login() {
 
       if (response.ok) {
         // Redirect to a protected page or dashboard
+        localStorage.setItem("token", data.token); // Store the token
+        console.log("Logged in successfully!");
         router.push("/opponentSelect");
       } else {
         if (data.error == "Invalid credentials") {
