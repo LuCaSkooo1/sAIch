@@ -5,8 +5,8 @@ import { Chessboard } from "react-chessboard";
 import { Chess, type Square } from "chess.js";
 import Engine from "./engine";
 import { PromotionPieceOption } from "react-chessboard/dist/chessboard/types";
+import Link from "next/link";
 
-// Type for state managing squares with custom styles (right-clicked, move options, etc.)
 interface SquareStyles {
   [key: string]: {
     backgroundColor?: string;
@@ -59,7 +59,12 @@ export const PlayVsComputer = ({
   const engine = useMemo(() => new Engine(), []);
   engine.stockfish?.postMessage(`setoption name Skill Level value ${level}`);
   const game = useMemo(() => new Chess(), []);
-  const [, setWon] = useState<"black" | "white" | "draw" | null>();
+  const [gameOver, setGameOver] = useState<{ isOver: boolean; result: string }>(
+    {
+      isOver: false,
+      result: "",
+    }
+  );
   const [gamePosition, setGamePosition] = useState(game.fen());
 
   const [moveFrom, setMoveFrom] = useState<string>("");
@@ -74,9 +79,15 @@ export const PlayVsComputer = ({
   const [moveSquares] = useState<SquareStyles>({});
   const [optionSquares, setOptionSquares] = useState<SquareStyles>({});
 
-  function checkEnd(side: "black" | "white") {
-    if (game.isDraw()) setWon("draw");
-    if (game.isCheckmate()) setWon(side);
+  function checkEnd(side: "b" | "w") {
+    if (game.isDraw()) {
+      setGameOver({ isOver: true, result: "Draw" });
+    } else if (game.isCheckmate()) {
+      setGameOver({
+        isOver: true,
+        result: `Checkmate: ${side === "w" ? "White" : "Black"} Wins`,
+      });
+    }
   }
 
   const findBestMove = useCallback(() => {
@@ -171,7 +182,7 @@ export const PlayVsComputer = ({
         return;
       }
       setGamePosition(game.fen());
-      checkEnd("white");
+      checkEnd("w");
       setMoveFrom("");
       setMoveTo(null);
       setOptionSquares({});
@@ -203,7 +214,7 @@ export const PlayVsComputer = ({
       }
 
       setGamePosition(game.fen());
-      checkEnd("white");
+      checkEnd("w");
       findBestMove();
     }
 
@@ -229,6 +240,17 @@ export const PlayVsComputer = ({
       return newSquares;
     });
   }
+
+  const restartGame = () => {
+    game.reset();
+    setGamePosition(game.fen());
+    setGameOver({ isOver: false, result: "" });
+    setMoveFrom("");
+    setMoveTo(null);
+    setOptionSquares({});
+    setBestline("");
+    findBestMove();
+  };
 
   return (
     <div className="w-[100vw] md:w-[500px]">
@@ -265,21 +287,41 @@ export const PlayVsComputer = ({
             : []
         }
       />
-      {/* <div className="flex gap-5 items-center mt-5">
-        <Switch
-          checked={aiAssistantActive}
-          onCheckedChange={setAiAssistantActive}
-          className="data-[state=checked]:bg-[#FF00F6] data-[state=unchecked]:bg-gray-500
-                 relative h-7 w-[50px] rounded-full transition-colors 
-                 before:absolute before:left-1 before:top-1 before:h-4 before:w-4 
-                 before:rounded-full before:bg-white before:shadow-md 
-                 before:transition-transform before:duration-200 
-                 data-[state=checked]:before:translate-x-6 items-center"
-        />
-        <h1 className="text-2xl">
-          <span className="color">AI</span> Asistent
-        </h1>
-      </div> */}
+      {gameOver.isOver && (
+        <GameOverScreen result={gameOver.result} onRestart={restartGame} />
+      )}
+    </div>
+  );
+};
+
+const GameOverScreen = ({
+  result,
+  onRestart,
+}: {
+  result: string;
+  onRestart: () => void;
+}) => {
+  return (
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center">
+      <div className="bg-[#302E2B] p-6 rounded-lg shadow-lg text-center">
+        <h2 className="text-2xl font-bold mb-4">Game Over</h2>
+        <p className="text-xl mb-6">{result}</p>
+        <div className="flex items-center gap-5">
+          <button
+            onClick={onRestart}
+            className="bg-[#FF00F6] text-white px-4 py-2 rounded-lg hover:bg-[#d729d1] transition-all"
+          >
+            Restart Game
+          </button>
+          <Link href="/">
+          <button
+            className="bg-white text-black px-4 py-2 rounded-lg hover:bg-white/80 transition-all"
+          >
+            Back to menu
+          </button>
+          </Link>
+        </div>
+      </div>
     </div>
   );
 };
