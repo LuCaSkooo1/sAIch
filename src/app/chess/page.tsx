@@ -70,7 +70,7 @@ export default function Chess() {
 
   useEffect(() => {
     checkAuth();
-  },); // Runs only once when the component mounts
+  },[]); // Runs only once when the component mounts
 
   const checkAuth = async () => {
     const token = localStorage.getItem("token");
@@ -82,7 +82,7 @@ export default function Chess() {
 
     try {
       const response = await fetch(
-        "http://localhost:5001/auth/opponentSelect",
+        "http://localhost:5001/api/opponentSelect",
         {
           method: "GET",
           headers: { Authorization: `Bearer ${token}` },
@@ -105,7 +105,7 @@ export default function Chess() {
 
   const fetchUserData = async (token: string) => {
     try {
-      const response = await fetch("http://localhost:5001/auth/user", {
+      const response = await fetch("http://localhost:5001/api/user", {
         method: "GET",
         headers: {
           Authorization: `Bearer ${token}`,

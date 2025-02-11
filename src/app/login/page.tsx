@@ -19,7 +19,7 @@ export default function Login() {
 
     // Send data to the backend
     try {
-      const response = await fetch("http://localhost:5001/auth/login", {
+      const response = await fetch("http://localhost:5001/api/login", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -42,7 +42,7 @@ export default function Login() {
         }
       }
     } catch (err) {
-      setError("Niečo sa pokazilo skúste to prosím neskô");
+      setError("Niečo sa pokazilo skúste to prosím neskôr");
       console.log(err);
     }
   };

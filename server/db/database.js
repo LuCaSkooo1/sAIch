@@ -20,6 +20,15 @@ db.serialize(() => {
         result TEXT,
         FOREIGN KEY(user_id) REFERENCES users(id)
     )`);
+
+    db.run(`CREATE TABLE IF NOT EXISTS game_stats (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        user_id INTEGER,
+        level INTEGER,
+        wins INTEGER DEFAULT 0,
+        losses INTEGER DEFAULT 0,
+        FOREIGN KEY (user_id) REFERENCES users(id)
+      )`);
 });
 
 export default db;

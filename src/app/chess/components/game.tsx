@@ -80,31 +80,78 @@ export const PlayVsComputer = ({
   const [optionSquares, setOptionSquares] = useState<SquareStyles>({});
 
   function checkEnd(side: "b" | "w") {
+    let result = "";
     if (game.isDraw()) {
-      setGameOver({ isOver: true, result: "Draw" });
+      result = "Draw";
     } else if (game.isCheckmate()) {
-      setGameOver({
-        isOver: true,
-        result: `Checkmate: ${side === "w" ? "White" : "Black"} Wins`,
-      });
+      result = `Checkmate: ${side === "w" ? "White" : "Black"} Wins`;
     }
+
+    if (result) {
+      setGameOver({ isOver: true, result });
+  
+      // Send result to the backend
+      sendGameResult(result);
+    } 
   }
+
+  const sendGameResult = async (result: string) => {
+    const token = localStorage.getItem("token"); // Get token from local storage
+  
+    if (!token) {
+      console.error("No token found in local storage");
+      return;
+    }
+  
+    console.log("Sending request with token:", token);
+  
+    const win = result.includes("White Wins") ? 1 : 0;
+    const lose = result.includes("Black Wins") ? 1 : 0;
+  
+    try {
+      const response = await fetch("http://localhost:5001/api/game-result", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`, // Ensure correct format
+        },
+        body: JSON.stringify({
+          level,
+          win,
+          lose,
+        }),
+      });
+  
+      const data = await response.json();
+      console.log("Response from server:", data);
+  
+      if (!response.ok) {
+        console.error("Server responded with:", response.status, data);
+      }
+    } catch (error) {
+      console.error("Failed to send game result:", error);
+    }
+  };
+  
 
   const findBestMove = useCallback(() => {
     if (game.turn() === "w") {
-      engine.evaluatePosition(game.fen(), 10);
+      engine.evaluatePosition(game.fen(), 20);
     } else {
       setTimeout(() => {
-        engine.evaluatePosition(game.fen(), 10);
+        engine.evaluatePosition(game.fen(), level);
       }, 500);
     }
 
     engine.onMessage?.(({ bestMove, pv }) => {
       if (game.turn() === "w" && pv) setBestline(pv);
-      if (game.turn() === "b" && bestMove) game.move(bestMove);
-      setGamePosition(game.fen());
+      if (game.turn() === "b" && bestMove) {
+        game.move(bestMove); // Apply the computer's move
+        setGamePosition(game.fen());
+        checkEnd("b"); // Check if the game is over after the computer's move
+      }
     });
-  }, [engine, game]);
+  }, []);
 
   function getMoveOptions(square: Square) {
     const moves = game.moves({
@@ -182,7 +229,7 @@ export const PlayVsComputer = ({
         return;
       }
       setGamePosition(game.fen());
-      checkEnd("w");
+      checkEnd("w"); // Check if the game is over after your move
       setMoveFrom("");
       setMoveTo(null);
       setOptionSquares({});
@@ -214,7 +261,7 @@ export const PlayVsComputer = ({
       }
 
       setGamePosition(game.fen());
-      checkEnd("w");
+      checkEnd("w"); // Check if the game is over after promotion
       findBestMove();
     }
 
@@ -254,6 +301,9 @@ export const PlayVsComputer = ({
 
   return (
     <div className="w-[100vw] md:w-[500px]">
+      {level === 1 && <h1 className="mb-5">Zvedavé dieťa</h1>}
+      {level === 10 && <h1 className="mb-5">Rastúci stratég</h1>}
+      {level === 20 && <h1 className="mb-5">Grand Master</h1>}
       <Chessboard
         position={gamePosition}
         onSquareClick={onSquareClick}
@@ -313,12 +363,10 @@ const GameOverScreen = ({
           >
             Restart Game
           </button>
-          <Link href="/">
-          <button
-            className="bg-white text-black px-4 py-2 rounded-lg hover:bg-white/80 transition-all"
-          >
-            Back to menu
-          </button>
+          <Link href="/opponentSelect">
+            <button className="bg-white text-black px-4 py-2 rounded-lg hover:bg-white/80 transition-all">
+              Back to menu
+            </button>
           </Link>
         </div>
       </div>
