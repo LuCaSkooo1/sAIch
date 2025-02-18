@@ -82,7 +82,7 @@ export default function Chess() {
 
     try {
       const response = await fetch(
-        "http://localhost:5001/api/opponentSelect",
+        "http://37.46.208.126:5001/api/opponentSelect",
         {
           method: "GET",
           headers: { Authorization: `Bearer ${token}` },
@@ -105,7 +105,7 @@ export default function Chess() {
 
   const fetchUserData = async (token: string) => {
     try {
-      const response = await fetch("http://localhost:5001/api/user", {
+      const response = await fetch("http://37.46.208.126:5001/api/user", {
         method: "GET",
         headers: {
           Authorization: `Bearer ${token}`,
