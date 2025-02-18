@@ -19,7 +19,7 @@ export default function Login() {
 
     // Send data to the backend
     try {
-      const response = await fetch("http://37.46.208.126:5001/api/login", {
+      const response = await fetch("http://localhost:5001/api/login", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -70,7 +70,7 @@ export default function Login() {
         >
           <div className="flex flex-col w-[80vw] lg:w-[30vw]">
             <label htmlFor="input">
-              <span className="color font-semibold">Prezívka</span>
+              <span className="color font-semibold">Prezývka</span>
             </label>
             <input
               id="nick"

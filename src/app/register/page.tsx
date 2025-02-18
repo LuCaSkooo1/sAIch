@@ -27,18 +27,18 @@ export default function Register() {
     }
 
     if (username.length > 10){
-      setError("Prezívka musí byť kratšia ako 10 charakterov")
+      setError("Prezývka musí byť kratšia ako 10 charakterov")
       return
     }
 
     if (!usernameRegex.test(username)) {
-      setError("Prezívka nemôže obsahovať medzery")
+      setError("Prezývka nemôže obsahovať medzery")
       return
     } 
 
     // Send data to the backend
     try {
-      const response = await fetch("http://37.46.208.126:5001/api/register", {
+      const response = await fetch("http://localhost:5001/api/register", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -85,7 +85,7 @@ export default function Register() {
         >
           <div className="flex flex-col w-[80vw] lg:w-[30vw]">
             <label htmlFor="nick">
-              <span className="color font-semibold">Prezívka</span>
+              <span className="color font-semibold">Prezývka</span>
             </label>
             <input
               id="nick"

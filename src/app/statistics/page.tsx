@@ -36,7 +36,7 @@ export default function Statistics() {
     }
 
     try {
-      const response = await fetch("http://37.46.208.126:5001/api/opponentSelect", {
+      const response = await fetch("http://localhost:5001/api/opponentSelect", {
         method: "GET",
         headers: { Authorization: `Bearer ${token}` },
       });
@@ -57,7 +57,7 @@ export default function Statistics() {
 
   const fetchUserData = async (token: string) => {
     try {
-      const response = await fetch("http://37.46.208.126:5001/api/user", {
+      const response = await fetch("http://localhost:5001/api/user", {
         method: "GET",
         headers: {
           Authorization: `Bearer ${token}`,
@@ -82,7 +82,7 @@ export default function Statistics() {
     const token = localStorage.getItem("token");
 
     try {
-      const response = await fetch("http://37.46.208.126:5001/api/statistics", {
+      const response = await fetch("http://localhost:5001/api/statistics", {
         method: "GET",
         headers: {
           Authorization: `Bearer ${token}`,

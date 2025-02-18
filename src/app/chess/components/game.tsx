@@ -109,7 +109,7 @@ export const PlayVsComputer = ({
     const lose = result.includes("Black Wins") ? 1 : 0;
   
     try {
-      const response = await fetch("http://37.46.208.126:5001/api/game-result", {
+      const response = await fetch("http://localhost:5001/api/game-result", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
