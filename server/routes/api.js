@@ -3,9 +3,10 @@ import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import db from "../db/database.js";
 import dotenv from "dotenv";
+import { authenticateToken } from "../middleware/authMiddleware.js";
+
 dotenv.config();
 const router = express.Router();
-import { authenticateToken } from "../middleware/authMiddleware.js";
 
 // User registration
 router.post("/register", (req, res) => {
@@ -49,22 +50,6 @@ router.post("/login", (req, res) => {
 
     res.json({ token });
   });
-});
-
-router.get("/opponentSelect", authenticateToken, (req, res) => {
-  const userId = req.user.userId;
-
-  db.get(
-    "SELECT id, username FROM users WHERE id = ?",
-    [userId],
-    (err, user) => {
-      if (err || !user) {
-        return res.status(404).json({ error: "User not found" });
-      }
-
-      res.json({ user }); // Return user data
-    }
-  );
 });
 
 router.get("/user", authenticateToken, (req, res) => {

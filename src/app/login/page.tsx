@@ -1,9 +1,10 @@
 "use client";
 
-import Image from "next/image";
 import Link from "next/link";
 import { FormEvent, useState } from "react";
 import { useRouter } from "next/navigation";
+import Header from "@/components/header";
+import { createLink } from "@/lib/utils";
 
 export default function Login() {
   const [username, setUsername] = useState("");
@@ -19,7 +20,7 @@ export default function Login() {
 
     // Send data to the backend
     try {
-      const response = await fetch("http://localhost:5001/api/login", {
+      const response = await fetch(createLink("api/login"), {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -49,19 +50,7 @@ export default function Login() {
 
   return (
     <div className="min-h-screen">
-      <div className="p-10 items-center flex justify-center gap-16 ">
-        <Link href="/">
-          <div className="w-28 md:w-32">
-            <Image
-              src="/šAIch..svg"
-              alt="ŠAICH"
-              width={150}
-              height={66}
-              className="size-full"
-            />
-          </div>
-        </Link>
-      </div>
+      <Header home />
       <div className="flex flex-col items-center mt-10">
         <h1 className="text-3xl">Prihlásenie</h1>
         <form
@@ -74,13 +63,14 @@ export default function Login() {
             </label>
             <input
               id="nick"
-              type="input"
-              className="h-10 rounded-xl px-3"
+              type="text"
+              className="h-12 rounded-xl px-3"
               placeholder="Šachista"
+              autoComplete="username"
               value={username}
               onChange={(e) => setUsername(e.target.value)}
               required
-            ></input>
+            />
           </div>
           <div className="flex flex-col">
             <label htmlFor="password">
@@ -89,14 +79,15 @@ export default function Login() {
             <input
               id="password"
               type="password"
-              className="h-10 rounded-xl px-3"
+              className="h-12 rounded-xl px-3"
               placeholder="********"
+              autoComplete="current-password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               required
-            ></input>
+            />
           </div>
-          <button className="primary h-16 mt-5 text-white" type="submit">
+          <button className="primary h-12 mt-3 text-white" type="submit">
             Prihlásiť sa
           </button>
         </form>

@@ -4,7 +4,7 @@
 :root {
   --background: url("/background2.svg");
   --foreground: #ffffff;
-  }
+}
 
 
 html {
@@ -40,12 +40,12 @@ span.wavy{
 
 button.primary{
   background: linear-gradient(-45deg, #FF5100,#FF00F6);
-  border-radius: 24px;
+  border-radius: 14px;
   font-weight: 600;
   transition: all 0.3s;
 }
 button.secondary {
-  border-radius: 24px;
+  border-radius: 14px;
   color: rgb(255, 255, 255);
   border: 5px solid rgb(255, 255, 255);
   font-weight: 600;
@@ -55,7 +55,7 @@ button.secondary {
 }
 
 button:hover{
-  transform: scale(1.1);
+  transform: scale(1.025);
 }
 
 /*! chessboard.js v1.0.0 | (c) 2019 Chris Oakman | MIT License chessboardjs.com/license */
@@ -151,30 +151,18 @@ button:hover{
 }
 
 /* Hover effect for items inside Popover */
-.PopoverContent .flex.items-center.gap-3 {
+.PopoverContent .popover-button {
   padding: 8px 12px;
   border-radius: 6px;
   transition: background-color 0.2s ease, transform 0.2s ease;
 }
 
-.PopoverContent .flex.items-center.gap-3:hover {
+.PopoverContent .popover-button:hover {
   background-color: rgba(0, 0, 0, 0.05);
-  transform: translateX(5px);
+  transform: scale(1.025);
 }
 
 /* Logout item specific styles */
-.PopoverContent .flex.items-center.gap-3.text-red-500:hover {
+.PopoverContent .popover-button.text-red-500:hover {
   background-color: rgba(255, 0, 0, 0.05);
 }
-
-/* Icon and text alignment */
-.PopoverContent .flex.items-center.gap-3 svg {
-  width: 20px;
-  height: 20px;
-}
-
-.PopoverContent .flex.items-center.gap-3 h4 {
-  margin: 0;
-  font-size: 14px;
-}
-

@@ -6,6 +6,7 @@ import { Chess, type Square } from "chess.js";
 import Engine from "./engine";
 import { PromotionPieceOption } from "react-chessboard/dist/chessboard/types";
 import Link from "next/link";
+import { createLink } from "@/lib/utils";
 
 interface SquareStyles {
   [key: string]: {
@@ -79,37 +80,21 @@ export const PlayVsComputer = ({
   const [moveSquares] = useState<SquareStyles>({});
   const [optionSquares, setOptionSquares] = useState<SquareStyles>({});
 
-  function checkEnd(side: "b" | "w") {
-    let result = "";
-    if (game.isDraw()) {
-      result = "Draw";
-    } else if (game.isCheckmate()) {
-      result = `Checkmate: ${side === "w" ? "White" : "Black"} Wins`;
-    }
-
-    if (result) {
-      setGameOver({ isOver: true, result });
-  
-      // Send result to the backend
-      sendGameResult(result);
-    } 
-  }
-
-  const sendGameResult = async (result: string) => {
+  const sendGameResult = useCallback(async (result: string) => {
     const token = localStorage.getItem("token"); // Get token from local storage
-  
+
     if (!token) {
       console.error("No token found in local storage");
       return;
     }
-  
+
     console.log("Sending request with token:", token);
-  
+
     const win = result.includes("White Wins") ? 1 : 0;
     const lose = result.includes("Black Wins") ? 1 : 0;
-  
+
     try {
-      const response = await fetch("http://localhost:5001/api/game-result", {
+      const response = await fetch(createLink("api/game-result"), {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -121,18 +106,34 @@ export const PlayVsComputer = ({
           lose,
         }),
       });
-  
+
       const data = await response.json();
       console.log("Response from server:", data);
-  
+
       if (!response.ok) {
         console.error("Server responded with:", response.status, data);
       }
     } catch (error) {
       console.error("Failed to send game result:", error);
     }
-  };
-  
+  }, [level])
+
+  const checkEnd = useCallback((side: "b" | "w") => {
+    let result = "";
+    if (game.isDraw()) {
+      result = "Draw";
+    } else if (game.isCheckmate()) {
+      result = `Checkmate: ${side === "w" ? "White" : "Black"} Wins`;
+    }
+
+    if (result) {
+      setGameOver({ isOver: true, result });
+
+      // Send result to the backend
+      sendGameResult(result);
+    }
+  }, [game, sendGameResult])
+
 
   const findBestMove = useCallback(() => {
     if (game.turn() === "w") {
@@ -146,12 +147,12 @@ export const PlayVsComputer = ({
     engine.onMessage?.(({ bestMove, pv }) => {
       if (game.turn() === "w" && pv) setBestline(pv);
       if (game.turn() === "b" && bestMove) {
-        game.move(bestMove); // Apply the computer's move
-        setGamePosition(game.fen());
-        checkEnd("b"); // Check if the game is over after the computer's move
+        game.move(bestMove)
+        setGamePosition(game.fen())
+        checkEnd("b")
       }
     });
-  }, []);
+  }, [checkEnd, engine, game, level]);
 
   function getMoveOptions(square: Square) {
     const moves = game.moves({
@@ -167,7 +168,7 @@ export const PlayVsComputer = ({
       newSquares[move.to] = {
         background:
           game.get(move.to) &&
-          game.get(move.to).color !== game.get(square).color
+            game.get(move.to)?.color !== game.get(square)?.color
             ? "radial-gradient(circle, rgba(0,0,0,.1) 85%, transparent 85%)"
             : "radial-gradient(circle, rgba(0,0,0,.1) 25%, transparent 25%)",
         borderRadius: "50%",
@@ -273,15 +274,15 @@ export const PlayVsComputer = ({
   }
 
   function onSquareRightClick(square: Square) {
-    const colour = "rgba(0, 0, 255, 0.4)";
+    const color = "rgba(0, 0, 255, 0.4)";
 
     setRightClickedSquares((prev) => {
       const newSquares = { ...prev };
 
-      if (newSquares[square] && newSquares[square].backgroundColor === colour) {
+      if (newSquares[square] && newSquares[square].backgroundColor === color) {
         delete newSquares[square];
       } else {
-        newSquares[square] = { backgroundColor: colour };
+        newSquares[square] = { backgroundColor: color };
       }
 
       return newSquares;
@@ -304,39 +305,41 @@ export const PlayVsComputer = ({
       {level === 1 && <h1 className="mb-5">Zvedavé dieťa</h1>}
       {level === 10 && <h1 className="mb-5">Rastúci stratég</h1>}
       {level === 20 && <h1 className="mb-5">Grand Master</h1>}
-      <Chessboard
-        position={gamePosition}
-        onSquareClick={onSquareClick}
-        onSquareRightClick={onSquareRightClick}
-        onPromotionPieceSelect={onPromotionPieceSelect}
-        customPieces={customPieces}
-        customDarkSquareStyle={{
-          backgroundColor: "#94568B",
-        }}
-        customLightSquareStyle={{
-          backgroundColor: "#ECD0E9",
-        }}
-        customSquareStyles={{
-          ...moveSquares,
-          ...optionSquares,
-          ...rightClickedSquares,
-        }}
-        promotionToSquare={moveTo}
-        showPromotionDialog={showPromotionDialog}
-        animationDuration={300}
-        arePiecesDraggable={false}
-        customArrows={
-          aiAssistantActive && bestMove
-            ? [
+      <div className="w-full aspect-square">
+        <Chessboard
+          position={gamePosition}
+          onSquareClick={onSquareClick}
+          onSquareRightClick={onSquareRightClick}
+          onPromotionPieceSelect={onPromotionPieceSelect}
+          customPieces={customPieces}
+          customDarkSquareStyle={{
+            backgroundColor: "#94568B",
+          }}
+          customLightSquareStyle={{
+            backgroundColor: "#ECD0E9",
+          }}
+          customSquareStyles={{
+            ...moveSquares,
+            ...optionSquares,
+            ...rightClickedSquares,
+          }}
+          promotionToSquare={moveTo}
+          showPromotionDialog={showPromotionDialog}
+          animationDuration={300}
+          arePiecesDraggable={false}
+          customArrows={
+            aiAssistantActive && bestMove
+              ? [
                 [
                   bestMove.substring(0, 2) as Square,
                   bestMove.substring(2, 4) as Square,
                   "rgba(251, 0, 255, 1)",
                 ],
               ]
-            : []
-        }
-      />
+              : []
+          }
+        />
+      </div>
       {gameOver.isOver && (
         <GameOverScreen result={gameOver.result} onRestart={restartGame} />
       )}

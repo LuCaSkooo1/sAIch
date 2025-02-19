@@ -1,5 +1,6 @@
 "use client"
 
+import Header from "@/components/header";
 import Image from "next/image";
 import { useRouter } from 'next/navigation'
 
@@ -9,17 +10,7 @@ export default function Home() {
 
   return (
     <div className="min-h-screen">
-      <div className="p-10 items-center justify-center flex gap-16 ">
-        <div className="w-28 md:w-32">
-          <Image
-            src="/šAIch..svg"
-            alt="ŠAICH"
-            width={150}
-            height={66}
-            className="size-full"
-          />
-        </div>
-      </div>
+      <Header />
       <div className="justify-center items-center flex flex-row w-full h-full">
         <div className="flex flex-col xl:flex-row justify-center items-center gap-10">
           <div className="w-[70%] sm:w-1/3 md:w-1/2 max-w-[450px] aspect-square rounded">
@@ -29,6 +20,7 @@ export default function Home() {
               className="size-full"
               src="/chessboard.png"
               alt="chessboard"
+              priority
             />
           </div>
           <div>
@@ -40,7 +32,6 @@ export default function Home() {
               <button type="button" className="w-[90%] secondary h-20 text-2xl mb-5 px-5" onClick={() => router.push('/register')}>Zaregistrovať sa</button>
             </div>
           </div>
-
         </div>
       </div>
     </div>
