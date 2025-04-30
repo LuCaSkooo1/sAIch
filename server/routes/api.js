@@ -115,7 +115,7 @@ router.get("/statistics", authenticateToken, async (req, res) => {
       [userId],
       (err, data) => {
         // If no stats exist, return default values
-        console.log(err);
+        if (err) console.log(err)
         if (!data.length) {
           return res.json([
             { level: 1, total_wins: 0, total_losses: 0 },

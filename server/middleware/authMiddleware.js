@@ -3,7 +3,6 @@ import jwt from "jsonwebtoken";
 
 export const authenticateToken = (req, res, next) => {
     const authHeader = req.headers["authorization"];
-    console.log("Auth Header:", authHeader); // Log incoming header
 
     if (!authHeader) {
         console.error("No Authorization header found");
@@ -11,7 +10,6 @@ export const authenticateToken = (req, res, next) => {
     }
 
     const token = authHeader.split(" ")[1]; // Extract token after 'Bearer '
-    console.log("Extracted Token:", token);
 
     if (!token) {
         console.error("No token found in Authorization header");
