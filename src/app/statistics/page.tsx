@@ -24,9 +24,12 @@ export default function Statistics() {
   );
   const totalWins = stats.reduce((sum, stat) => sum + stat.total_wins, 0);
   const totalLosses = stats.reduce((sum, stat) => sum + stat.total_losses, 0);
-
+  const [leaderboard, setLeaderboard] = useState<
+    {nickname: string; total_wins: number}[]
+>([])
   useEffect(() => {
     fetchStatistics();
+	fetchBest();
   }, []);
 
   const fetchStatistics = async () => {
@@ -53,10 +56,21 @@ export default function Statistics() {
       console.error("Error fetching statistics:", error);
     }
   };
-
   if (error) {
     return <div>{error}</div>;
   }
+  const fetchBest = async () => {
+	try {
+	  const response = await fetch(createLink('api/leaderboard'));
+	  if (!response.ok) {
+		throw new Error('Network response was not ok');
+	  }
+	  const data = await response.json();
+	  setLeaderboard(data);
+	} catch (error) {
+		console.log("Something went wrong" + error)
+	}
+  };
 
   return (
     authorized && (
@@ -193,50 +207,33 @@ export default function Statistics() {
                     Top 10 hráčov s najväčším počtom výhier na svete 🔟 🏆
                   </CardTitle>
                 </CardHeader>
-                <CardContent>
-                  <div className="mt-5">
-                  <div className="text-lg flex items-center justify-between md:p-5">
-                    <p>Janko hrasko</p>
-                    <p className="text-yellow-500">10 Výhier</p>
-                  </div>
-                  <div className="text-lg flex items-center justify-between md:p-5">
-                    <p>Janko hrasko</p>
-                    <p className="text-gray-400">9 Výhier</p>
-                  </div>
-                  <div className="text-lg flex items-center justify-between md:p-5">
-                    <p>Janko hrasko</p>
-                    <p className="text-amber-700">8 Výhier</p>
-                  </div>
-                  <div className="text-lg flex items-center justify-between md:p-5">
-                    <p>Janko hrasko</p>
-                    <p>7 Výhier</p>
-                  </div>
-                  <div className="text-lg flex items-center justify-between md:p-5">
-                    <p>Janko hrasko</p>
-                    <p>6 Výhier</p>
-                  </div>
-                  <div className="text-lg flex items-center justify-between md:p-5">
-                    <p>Janko hrasko</p>
-                    <p>5 Výhier</p>
-                  </div>
-                  <div className="text-lg flex items-center justify-between md:p-5">
-                    <p>Janko hrasko</p>
-                    <p>4 Výhier</p>
-                  </div>
-                  <div className="text-lg flex items-center justify-between md:p-5">
-                    <p>Janko hrasko</p>
-                    <p>3 Výhier</p>
-                  </div>
-                  <div className="text-lg flex items-center justify-between md:p-5">
-                    <p>Janko hrasko</p>
-                    <p>2 Výhier</p>
-                  </div>
-                  <div className="text-lg flex items-center justify-between md:p-5">
-                    <p>Janko hrasko</p>
-                    <p>1 Výhier</p>
-                  </div>
-                  </div>
-                 
+                <CardContent>{leaderboard.map((nickname, index) => {
+					let textColor = "";
+
+					// Assign color based on index
+					switch (index) {
+					case 0:
+						textColor = "text-yellow-400"; // Gold
+						break;
+					case 1:
+						textColor = "text-gray-400"; // Silver
+						break;
+					case 2:
+						textColor = "text-orange-500"; // Bronze
+						break;
+					default:
+						textColor = "text-white"; // Default for 4th to 10th
+						break;
+					}
+
+					return (
+					<div className={`text-lg flex items-center justify-between md:p-5 ${textColor}`} key={index}>
+						<p>{index + 1}.</p>
+						<p>{nickname.nickname}</p>
+						<p>{nickname.total_wins} 🏆</p>
+					</div>
+					);
+				})}
                 </CardContent>
               </Card>
             </div>}

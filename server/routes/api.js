@@ -68,6 +68,41 @@ router.get("/user", authenticateToken, (req, res) => {
   );
 });
 
+router.get("/leaderboard", async (req, res) => {
+	try {
+	  // Query to get top 10 users by total wins across all levels
+	  db.all(`
+		SELECT
+		  u.username as nickname,
+		  SUM(gs.wins) as total_wins
+		FROM
+		  game_stats gs
+		JOIN
+		  users u ON gs.user_id = u.id
+		GROUP BY
+		  gs.user_id
+		ORDER BY
+		  total_wins DESC
+		LIMIT 10
+	  `, (err, leaderboard) => {
+		if (err) {
+		  console.error("Database error:", err);
+		  return res.status(500).json({ message: "Internal server error" });
+		}
+
+		// If no stats exist yet, return empty array
+		if (!leaderboard) {
+		  return res.json([]);
+		}
+
+		res.json(leaderboard);
+	  });
+	} catch (error) {
+	  console.error("Error fetching leaderboard:", error);
+	  res.status(500).json({ message: "Internal server error" });
+	}
+  });
+
 router.post("/game-result", authenticateToken, async (req, res) => {
   const { level, win, lose } = req.body;
   const userId = req.user.userId; // Extract userId from the token

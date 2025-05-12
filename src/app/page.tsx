@@ -9,7 +9,7 @@ export default function Home() {
   const router = useRouter()
 
   return (
-    <div className="min-h-screen">
+    <div className="min-h-screen text-center">
       <Header />
       <div className="justify-center items-center flex flex-row w-full h-full">
         <div className="flex flex-col xl:flex-row justify-center items-center gap-10">
@@ -32,8 +32,13 @@ export default function Home() {
               <button type="button" className="w-[90%] secondary h-20 text-2xl mb-5 px-5" onClick={() => router.push('/register')}>Zaregistrovať sa</button>
             </div>
           </div>
+
         </div>
+
       </div>
+	  <a href="chess/offline"><p className="mt-10 text-xl underline">Hrať offline</p></a>
+
     </div>
+
   );
 }
