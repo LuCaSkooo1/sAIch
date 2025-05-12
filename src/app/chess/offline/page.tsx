@@ -4,6 +4,7 @@ import { PlayVsComputer } from "../components/game"
 import { Switch } from "@/components/ui/switch"
 import { Suspense, useState } from "react"
 import { notFound, useSearchParams } from "next/navigation"
+import Link from "next/link"
 
 function ChessContent() {
   const params = useSearchParams()
@@ -23,7 +24,8 @@ function ChessContent() {
 
   return (
     <div className="flex justify-center items-center text-center flex-col w-full">
-		<div className="mt-20"></div>
+		<div className="mt-20 underline mb-3"><Link href="/"><p>Späť do menu</p></Link>
+		</div>
       <PlayVsComputer aiAssistantActive={aiAssistantActive} level={levels[level]} />
       <div className="flex gap-5 items-center mt-5">
         <Switch
