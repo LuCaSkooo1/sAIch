@@ -24,7 +24,7 @@ export default function Home() {
 						</p>
 						<p className="info-para mb-4">
 							Ospravedlňujeme sa, ale servery sú offline.
-							Nezúfajte! Trénovať môžete aj v offline móde.
+							Nezúfajte! Trénovať môžete aj bez prihlásenia.
 						</p>
 						<button
 							className="exit-button absolute top-2 right-2"
@@ -105,7 +105,7 @@ export default function Home() {
 			<a href="chess/offline?level=easy">
 				<p className="mt-10 text-xl underline mb-10">
 					{" "}
-					-{">"} Hrať offline
+					-{">"} Hrať bez prihlásenia
 				</p>
 			</a>
 		</div>
