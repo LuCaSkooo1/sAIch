@@ -5,11 +5,13 @@ import { Switch } from "@/components/ui/switch"
 import { Suspense, useState } from "react"
 import { notFound, useSearchParams } from "next/navigation"
 import Link from "next/link"
+import { useRouter } from "next/navigation";
+
 
 function ChessContent() {
   const params = useSearchParams()
   const level = (params.get("level") ?? "medium") as "easy" | "medium" | "hard"
-
+  const router = useRouter();
   const levels = {
     easy: 1,
     medium: 10,
@@ -24,7 +26,7 @@ function ChessContent() {
 
   return (
     <div className="flex justify-center items-center text-center flex-col w-full">
-		<div className="mt-20 underline mb-3"><Link href="/"><p>Späť do menu</p></Link>
+		<div className="mt-20 mb-3"><Link href="/"><p>{"<"}- <span className="underline">Späť do menu</span></p></Link>
 		</div>
       <PlayVsComputer aiAssistantActive={aiAssistantActive} level={levels[level]} />
       <div className="flex gap-5 items-center mt-5">
@@ -41,7 +43,11 @@ function ChessContent() {
         <h1 className="text-2xl">
           <span className="color">AI</span> Asistent
         </h1>
+
       </div>
+	  <div className="flex gap-3"><button className="secondary p-2 mt-5" onClick={() => {router.push("offline?level=easy")}}>Ľahká obtiažnosť</button>
+		<button className="secondary p-2 mt-5" onClick={() => {router.push("offline?level=medium")}}>Stredná obtiažnosť</button>
+		<button className="secondary p-2 mt-5" onClick={() => {router.push("offline?level=hard")}}>Ťažká obtiažnosť</button></div>
     </div>
   )
 }
